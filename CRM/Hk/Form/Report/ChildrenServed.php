@@ -8,7 +8,7 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
 
   protected $_summary = NULL;
 
-  protected $_customGroupExtends = array('Individual');
+  protected $_customGroupExtends = array('Contact');
   protected $_customGroupGroupBy = FALSE;
   protected $_specialCustomFields = array();
   function __construct() {
@@ -236,16 +236,12 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
           $curFilters[$fieldName]['operatorType'] = CRM_Report_Form::OP_SELECT;
           $curFilters[$fieldName]['options'] = array('' => ts('- select -')) + CRM_Core_PseudoConstant::get('CRM_Core_BAO_CustomField', 'custom_' . $customDAO->cf_id, array(), 'search');
           $curFilters[$fieldName]['type'] = $curFields[$fieldName]['type'] = CRM_Utils_Type::T_INT;
-          //$curFields[$fieldName]['dbAlias'] = "GROUP_CONCAT(DISTINCT CASE WHEN $customDAO->column_name = 1 THEN CONCAT(entity_id , '-', $customDAO->column_name) END)";
-          $curFields[$fieldName]['dbAlias'] = "COUNT($customDAO->column_name = 1)";
           $this->_specialCustomFields[$curTable . '_' . $fieldName] = 'Boolean';
           break;
 
         case 'Int':
           $curFilters[$fieldName]['operatorType'] = CRM_Report_Form::OP_INT;
           $curFilters[$fieldName]['type'] = CRM_Utils_Type::T_INT;
-          //$curFields[$fieldName]['dbAlias'] = "GROUP_CONCAT(DISTINCT CASE WHEN $customDAO->column_name > 0 THEN CONCAT(entity_id , '-', $customDAO->column_name) END)";
-          $curFields[$fieldName]['dbAlias'] = "SUM($customDAO->column_name)";
           $this->_specialCustomFields[$curTable . '_' . $fieldName] = 'Int';
           break;
 
