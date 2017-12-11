@@ -1012,12 +1012,9 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
              }
              $sql = sprintf(
                "SELECT SUM(number_of_children_under_6_52) as under_6, SUM(number_of_occupants_aged_6_17_54) as under_17
-                  FROM %s
-                  INNER JOIN civicrm_value_healthy_kids_information_1 ON civicrm_value_healthy_kids_information_1.entity_id = %s.entity_id
-                 WHERE %s.entity_id IN (%s) AND %s ",
-               $dao->table_name,
-               $dao->table_name,
-               $dao->table_name,
+                  FROM civicrm_value_children_information_5
+                  INNER JOIN civicrm_value_healthy_kids_information_1 ON civicrm_value_healthy_kids_information_1.entity_id = civicrm_value_children_information_5.entity_id
+                 WHERE civicrm_value_children_information_5.entity_id IN (%s) AND %s ",
                $contactIds,
                $whereClause
              );
