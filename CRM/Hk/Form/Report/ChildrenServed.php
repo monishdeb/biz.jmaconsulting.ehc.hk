@@ -314,8 +314,14 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => '0',
         ),
+        'under_17_affected_children' => array(
+          'title' => ts('Affected children under 17'),
+          'type' => CRM_Utils_Type::T_INT,
+          'dbAlias' => '0',
+        ),
       );
       $this->_specialCustomFields['civicrm_value_children_information_5_under_17_lead_hazard'] = 'Int';
+      $this->_specialCustomFields['civicrm_value_children_information_5_under_17_affected_children'] = 'Int';
     }
   }
 
@@ -999,16 +1005,21 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
           $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE year = '$year' AND activity_type_id = $activityTypeID ");
           $selectColumn = $this->_specialCustomFields[$tableCol] == 'Boolean' ? "COUNT(%s = 1)" : "SUM(%s)";
           if ($contactIds) {
-           if ($tableCol == 'civicrm_value_children_information_5_under_17_lead_hazard') {
+           if (in_array($tableCol, array('civicrm_value_children_information_5_under_17_lead_hazard', 'civicrm_value_children_information_5_under_17_affected_children'))) {
+             $whereClause = "lead_hazard_present_7 = 1";
+             if ($tableCol == 'civicrm_value_children_information_5_under_17_affected_children') {
+               $whereClause = " (lead_hazard_present_7 = 1 OR moisture_hazards_9 = 1 OR pesticides_used_11 = 1 OR cockroaches_present_10 = 1) ";
+             }
              $sql = sprintf(
                "SELECT SUM(number_of_children_under_6_52) as under_6, SUM(number_of_occupants_aged_6_17_54) as under_17
                   FROM %s
                   INNER JOIN civicrm_value_healthy_kids_information_1 ON civicrm_value_healthy_kids_information_1.entity_id = %s.entity_id
-                 WHERE %s.entity_id IN (%s) AND lead_hazard_present_7 = 1 ",
+                 WHERE %s.entity_id IN (%s) AND %s ",
                $dao->table_name,
                $dao->table_name,
                $dao->table_name,
-               $contactIds
+               $contactIds,
+               $whereClause
              );
              $dao = CRM_Core_DAO::executeQuery($sql);
              while($dao->fetch()) {
