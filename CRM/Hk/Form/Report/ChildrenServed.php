@@ -95,6 +95,22 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
               'count' => ts('Count'),
             ),
           ),
+          'gender_male' => array(
+            'title' => ts('Number of Male'),
+            'dbAlias' => '0',
+          ),
+          'gender_female' => array(
+            'title' => ts('Number of Female'),
+            'dbAlias' => '0',
+          ),
+          'gender_other' => array(
+            'title' => ts('Number of Other gender'),
+            'dbAlias' => '0',
+          ),
+          'gender_null' => array(
+            'title' => ts('Number of contacts with gender not entered'),
+            'dbAlias' => '0',
+          ),
         ),
         'filters' => array(
           'activity_date_time' => array(
@@ -144,6 +160,12 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
         'grouping' => 'activity-fields',
         'alias' => 'activity',
       ),
+    );
+    $this->_specialCustomFields = array(
+      'civicrm_activity_gender_male' => 'Int',
+      'civicrm_activity_gender_female' => 'Int',
+      'civicrm_activity_gender_other' => 'Int',
+      'civicrm_activity_gender_null' => 'Int',
     );
     $this->_groupFilter = TRUE;
 
@@ -308,17 +330,20 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
     }
 
     if ($addFields) {
-      $this->_columns['civicrm_value_children_information_5']['fields'] += array(
-        'under_17_lead_hazard' => array(
-          'title' => ts('Children under 17 <br/> with lead hazard'),
-          'type' => CRM_Utils_Type::T_INT,
-          'dbAlias' => '0',
-        ),
-        'under_17_affected_children' => array(
-          'title' => ts('Affected children under 17'),
-          'type' => CRM_Utils_Type::T_INT,
-          'dbAlias' => '0',
-        ),
+      $this->_columns['civicrm_value_children_information_5']['fields'] = array_merge(
+        $this->_columns['civicrm_value_children_information_5']['fields'],
+        array(
+          'under_17_lead_hazard' => array(
+            'title' => ts('Children under 17 <br/> with lead hazard'),
+            'type' => CRM_Utils_Type::T_INT,
+            'dbAlias' => '0',
+          ),
+          'under_17_affected_children' => array(
+            'title' => ts('Affected children under 17'),
+            'type' => CRM_Utils_Type::T_INT,
+            'dbAlias' => '0',
+          ),
+        )
       );
       $this->_specialCustomFields['civicrm_value_children_information_5_under_17_lead_hazard'] = 'Int';
       $this->_specialCustomFields['civicrm_value_children_information_5_under_17_affected_children'] = 'Int';
@@ -825,13 +850,6 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
     $priority = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id');
     $onHover = ts('View Contact Summary for this Contact');
     foreach ($rows as $rowNum => $row) {
-
-      foreach ($this->_specialCustomFields as $column => $type) {
-        if (empty($row[$column])) {
-          continue;
-        }
-      }
-
       // make count columns point to activity detail report
       if (!empty($row['civicrm_activity_id_count'])) {
         $url = array();
@@ -1008,6 +1026,29 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
              while($dao->fetch()) {
                $rows[$rowNum][$tableCol] = $dao->under_6 + $dao->under_17;
              }
+           }
+           elseif (in_array($tableCol, array(
+             'civicrm_activity_gender_male',
+             'civicrm_activity_gender_female',
+             'civicrm_activity_gender_other',
+             'civicrm_activity_gender_null',
+           ))) {
+             $whereClause = '';
+             if ($tableCol == 'civicrm_activity_gender_male') {
+               $selectColumn = sprintf("COUNT(gender_id = %d)", CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Male'));
+             }
+             elseif ($tableCol == 'civicrm_activity_gender_female') {
+               $selectColumn = sprintf("COUNT(gender_id = %d)", CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Female'));
+             }
+             elseif ($tableCol == 'civicrm_activity_gender_other') {
+               $selectColumn = "COUNT(gender_id)";
+               $whereClause = sprintf("gender_id NOT IN (%d, %d)", CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Male'), CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Female'));
+             }
+             elseif ($tableCol == 'civicrm_activity_gender_null') {
+               $selectColumn = "COUNT(civicrm_contact)";
+               $whereClause = "gender_id IS NULL";
+             }
+             $rows[$rowNum][$tableCol] = CRM_Core_DAO::singleValueQuery("SELECT $selectColumn FROM civicrm_contact WHERE id IN ($contactIds)");
            }
            else {
              $sql = sprintf(
