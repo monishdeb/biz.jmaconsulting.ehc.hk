@@ -1003,6 +1003,7 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
    * @param array $rows
    */
   public function alterCustomDataDisplay(&$rows) {
+    CRM_Core_Error::debug_var('sd', CRM_Core_DAO::executeQuery("SELECT * $this->_tempTableToStoreActivityIDs")->fetchAll());
     // custom code to alter rows having custom values
     if (empty($this->_customGroupExtends)) {
       return;
@@ -1067,12 +1068,19 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
              }
            }
            elseif ($tableCol == 'civicrm_value_property_specifics_3_lead_mitigation_investment') {
-             $sql = "SELECT COUNT(property_type_28 = 22) as single_family, COUNT(property_type_28 = 23) as multi_family
+             $sql = "SELECT COUNT(id) as count, property_type_28
               FROM civicrm_value_property_specifics_3
-              WHERE civicrm_value_property_specifics_3.entity_id IN ($contactIds) ";
+              WHERE civicrm_value_property_specifics_3.entity_id IN ($contactIds)
+              GROUP BY property_type_28 ";
               $dao = CRM_Core_DAO::executeQuery($sql);
+              $rows[$rowNum][$tableCol] = 0;
               while($dao->fetch()) {
-                $rows[$rowNum][$tableCol] = ($dao->single_family * 5000) + ($dao->multi_family * 10000);
+                if ($dao->property_type_28 == 22) {
+                  $rows[$rowNum][$tableCol] += $dao->count * 5000;
+                }
+                elseif ($dao->property_type_28 == 23) {
+                  $rows[$rowNum][$tableCol] += $dao->count * 10000;
+                }
               }
            }
            else {
