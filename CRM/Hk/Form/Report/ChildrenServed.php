@@ -306,6 +306,17 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
         $this->_columns[$curTable]['group_bys'] = array_merge($this->_columns[$curTable]['group_bys'], $curFields);
       }
     }
+
+    if ($addFields) {
+      $this->_columns['civicrm_value_children_information_5']['fields'] += array(
+        'under_17_lead_hazard' => array(
+          'title' => ts('Children under 17 with lead hazard'),
+          'type' => CRM_Utils_Type::T_INT,
+          'dbAlias' => '0',
+        ),
+      );
+      $this->_specialCustomFields['civicrm_value_children_information_5_under_17_lead_hazard'] = 'Int';
+    }
   }
 
   public function select() {
@@ -980,22 +991,38 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
     $entryFound = FALSE;
     $activityType = CRM_Core_PseudoConstant::activityType(TRUE, TRUE, FALSE, 'label', TRUE);
     foreach ($rows as $rowNum => $row) {
-      //CRM_Core_Error::debug_var('$row', $row);
       foreach ($row as $tableCol => $val) {
         if (array_key_exists($tableCol, $this->_specialCustomFields)) {
           $year = $row['civicrm_activity_activity_date_time_interval'];
           $activityTypeID = array_search($row['civicrm_activity_activity_type_id'], $activityType);
           $entryFound = TRUE;
-          $selectColumn = $this->_specialCustomFields[$tableCol] == 'Boolean' ? "COUNT(%s = 1)" : "SUM(%s)";
           $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE year = '$year' AND activity_type_id = $activityTypeID ");
+          $selectColumn = $this->_specialCustomFields[$tableCol] == 'Boolean' ? "COUNT(%s = 1)" : "SUM(%s)";
           if ($contactIds) {
-           $sql = sprintf(
-             "SELECT $selectColumn FROM %s WHERE entity_id IN (%s) ",
-             $dao->column_name,
-             $dao->table_name,
-             $contactIds
-           );
-           $rows[$rowNum][$tableCol] = CRM_Core_DAO::singleValueQuery($sql);
+           if ($tableCol == 'civicrm_value_children_information_5_under_17_lead_hazard') {
+             $sql = sprintf(
+               "SELECT SUM(number_of_children_under_6_52) as under_6, SUM(number_of_occupants_aged_6_17_54) as under_17
+                  FROM %s
+                  INNER JOIN civicrm_value_healthy_kids_information_1 ON civicrm_value_healthy_kids_information_1.entity_id = %s.entity_id
+                 WHERE entity_id IN (%s) AND lead_hazard_present_7 = 1 ",
+               $dao->table_name,
+               $dao->table_name,
+               $contactIds
+             );
+             $dao = CRM_Core_DAO::executeQuery($sql);
+             while($dao->fetch()) {
+               $rows[$rowNum][$tableCol] = $dao->under_6 + $dao->under_17;
+             }
+           }
+           else {
+             $sql = sprintf(
+               "SELECT $selectColumn FROM %s WHERE entity_id IN (%s) ",
+               $dao->column_name,
+               $dao->table_name,
+               $contactIds
+             );
+             $rows[$rowNum][$tableCol] = CRM_Core_DAO::singleValueQuery($sql);
+           }
           }
         }
         elseif (array_key_exists($tableCol, $customFields)) {
