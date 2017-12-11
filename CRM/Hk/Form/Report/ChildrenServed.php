@@ -310,7 +310,7 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
     if ($addFields) {
       $this->_columns['civicrm_value_children_information_5']['fields'] += array(
         'under_17_lead_hazard' => array(
-          'title' => ts('Children under 17 with lead hazard'),
+          'title' => ts('Children under 17 <br/> with lead hazard'),
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => '0',
         ),
@@ -830,20 +830,6 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
         if (empty($row[$column])) {
           continue;
         }
-        /**
-        if ($type == 'Boolean') {
-          $rows[$rowNum][$column] = count(explode(',', $rows[$rowNum][$column]));
-        }
-        elseif ($type == 'Int') {
-          $value = $rows[$rowNum][$column];
-          $count = 0;
-          foreach(explode(',', $value) as $val) {
-            $split = explode('-', $val);
-            $count += (int) $split[1];
-          }
-          $rows[$rowNum][$column] = $count;
-        }
-        **/
       }
 
       // make count columns point to activity detail report
@@ -1008,7 +994,7 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
            if (in_array($tableCol, array('civicrm_value_children_information_5_under_17_lead_hazard', 'civicrm_value_children_information_5_under_17_affected_children'))) {
              $whereClause = "lead_hazard_present_7 = 1";
              if ($tableCol == 'civicrm_value_children_information_5_under_17_affected_children') {
-               $whereClause = " (lead_hazard_present_7 = 1 OR moisture_hazards_9 = 1 OR pesticides_used_11 = 1 OR cockroaches_present_10 = 1) ";
+               $whereClause = " (lead_hazard_present_7 = 1 OR moisture_hazards_9 = 1 OR pesticides_used_11 = 1 OR cockroaches_present_10 = 1 OR toxic_cleaners_used_12 = 1) ";
              }
              $sql = sprintf(
                "SELECT SUM(number_of_children_under_6_52) as under_6, SUM(number_of_occupants_aged_6_17_54) as under_17
