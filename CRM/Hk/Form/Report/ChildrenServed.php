@@ -98,6 +98,7 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
           'gender_male' => array(
             'title' => ts('Number of Male'),
             'dbAlias' => '0',
+            'type' => CRM_Utils_Type::T_INT,
           ),
           'gender_female' => array(
             'title' => ts('Number of Female'),
@@ -160,12 +161,6 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
         'grouping' => 'activity-fields',
         'alias' => 'activity',
       ),
-    );
-    $this->_specialCustomFields = array(
-      'civicrm_activity_gender_male' => 'Int',
-      'civicrm_activity_gender_female' => 'Int',
-      'civicrm_activity_gender_other' => 'Int',
-      'civicrm_activity_gender_null' => 'Int',
     );
     $this->_groupFilter = TRUE;
 
@@ -851,38 +846,6 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
     $onHover = ts('View Contact Summary for this Contact');
     foreach ($rows as $rowNum => $row) {
 
-      foreach (array(
-        'civicrm_activity_gender_male',
-        'civicrm_activity_gender_female',
-        'civicrm_activity_gender_other',
-        'civicrm_activity_gender_null',
-      ) as $tableCol) {
-        if (!array_key_exists($tableCol, $row)) {
-          continue;
-        }
-        $year = $row['civicrm_activity_activity_date_time_interval'];
-        $activityTypeID = $row['civicrm_activity_activity_type_id'];
-        $entryFound = TRUE;
-        $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE year = '$year' AND activity_type_id = $activityTypeID ");
-        if ($contactIds) {
-          $whereClause = '(1)';
-          if ($tableCol == 'civicrm_activity_gender_male') {
-            $selectColumn = sprintf("COUNT(gender_id = %d)", CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Male'));
-          }
-          elseif ($tableCol == 'civicrm_activity_gender_female') {
-            $selectColumn = sprintf("COUNT(gender_id = %d)", CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Female'));
-          }
-          elseif ($tableCol == 'civicrm_activity_gender_other') {
-            $selectColumn = "COUNT(gender_id)";
-            $whereClause = sprintf("gender_id NOT IN (%d, %d)", CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Male'), CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Female'));
-          }
-          elseif ($tableCol == 'civicrm_activity_gender_null') {
-            $selectColumn = "COUNT(id)";
-            $whereClause = "gender_id IS NULL";
-          }
-          $rows[$rowNum][$tableCol] = CRM_Core_DAO::singleValueQuery("SELECT $selectColumn FROM civicrm_contact WHERE id IN ($contactIds) AND $whereClause ");
-        }
-      }
       // make count columns point to activity detail report
       if (!empty($row['civicrm_activity_id_count'])) {
         $url = array();
@@ -948,6 +911,39 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
           // store the contact ID of this contact
           $previousContact = $value;
           $entryFound = TRUE;
+        }
+      }
+
+      foreach (array(
+        'civicrm_activity_gender_male',
+        'civicrm_activity_gender_female',
+        'civicrm_activity_gender_other',
+        'civicrm_activity_gender_null',
+      ) as $tableCol) {
+        $entryFound = TRUE;
+        if (!array_key_exists($tableCol, $row)) {
+          continue;
+        }
+        $year = $row['civicrm_activity_activity_date_time_interval'];
+        $activityTypeID = $row['civicrm_activity_activity_type_id'];
+        $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE year = '$year' AND activity_type_id = $activityTypeID ");
+        if ($contactIds) {
+          $whereClause = '(1)';
+          if ($tableCol == 'civicrm_activity_gender_male') {
+            $selectColumn = sprintf("COUNT(gender_id = %d)", CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Male'));
+          }
+          elseif ($tableCol == 'civicrm_activity_gender_female') {
+            $selectColumn = sprintf("COUNT(gender_id = %d)", CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Female'));
+          }
+          elseif ($tableCol == 'civicrm_activity_gender_other') {
+            $selectColumn = "COUNT(gender_id)";
+            $whereClause = sprintf("gender_id NOT IN (%d, %d)", CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Male'), CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Female'));
+          }
+          elseif ($tableCol == 'civicrm_activity_gender_null') {
+            $selectColumn = "COUNT(id)";
+            $whereClause = "gender_id IS NULL";
+          }
+          $rows[$rowNum][$tableCol] = CRM_Core_DAO::singleValueQuery("SELECT $selectColumn FROM civicrm_contact WHERE id IN ($contactIds) AND $whereClause ");
         }
       }
 
