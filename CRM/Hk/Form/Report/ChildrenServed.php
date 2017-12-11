@@ -8,7 +8,7 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
 
   protected $_summary = NULL;
 
-  protected $_customGroupExtends = array('Contact');
+  protected $_customGroupExtends = array('Contact', 'Activity');
   protected $_customGroupGroupBy = FALSE;
   protected $_specialCustomFields = array();
   function __construct() {
