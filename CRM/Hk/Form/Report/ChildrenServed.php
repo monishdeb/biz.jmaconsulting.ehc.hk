@@ -856,7 +856,7 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
         'civicrm_activity_gender_female',
         'civicrm_activity_gender_other',
         'civicrm_activity_gender_null',
-      )) as $tableCol) {
+      ) as $tableCol) {
         if (!array_key_exists($tableCol, $row)) {
           return;
         }
