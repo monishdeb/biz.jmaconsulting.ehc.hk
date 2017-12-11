@@ -858,7 +858,7 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
         'civicrm_activity_gender_null',
       ) as $tableCol) {
         if (!array_key_exists($tableCol, $row)) {
-          return;
+          continue;
         }
         $year = $row['civicrm_activity_activity_date_time_interval'];
         $activityTypeID = $row['civicrm_activity_activity_type_id'];
@@ -877,7 +877,7 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
             $whereClause = sprintf("gender_id NOT IN (%d, %d)", CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Male'), CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Female'));
           }
           elseif ($tableCol == 'civicrm_activity_gender_null') {
-            $selectColumn = "COUNT(civicrm_contact)";
+            $selectColumn = "COUNT(id)";
             $whereClause = "gender_id IS NULL";
           }
           $rows[$rowNum][$tableCol] = CRM_Core_DAO::singleValueQuery("SELECT $selectColumn FROM civicrm_contact WHERE id IN ($contactIds) AND $whereClause ");
