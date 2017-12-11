@@ -340,6 +340,17 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
           ),
         )
       );
+      $this->_columns['civicrm_value_property_specifics_3']['fields'] = array_merge(
+        $this->_columns['civicrm_value_property_specifics_3']['fields'],
+        array(
+          'lead_mitigation_investment' => array(
+            'title' => ts('Lead Mitigation Investment'),
+            'type' => CRM_Utils_Type::T_MONEY,
+            'dbAlias' => '0',
+          ),
+        )
+      );
+      $this->_specialCustomFields['civicrm_value_property_specifics_3_lead_mitigation_investment'] = 'Money';
       $this->_specialCustomFields['civicrm_value_children_information_5_under_17_lead_hazard'] = 'Int';
       $this->_specialCustomFields['civicrm_value_children_information_5_under_17_affected_children'] = 'Int';
     }
@@ -1054,6 +1065,15 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
              while($dao->fetch()) {
                $rows[$rowNum][$tableCol] = $dao->under_6 + $dao->under_17;
              }
+           }
+           elseif ($tableCol == 'civicrm_value_property_specifics_3_lead_mitigation_investment') {
+             $sql = "SELECT COUNT(property_type_28 = 22) as single_family, COUNT(property_type_28 = 23) as multi_family
+              FROM civicrm_value_property_specifics_3
+              WHERE civicrm_value_property_specifics_3.entity_id IN ($contactIds) ";
+              $dao = CRM_Core_DAO::executeQuery($sql);
+              while($dao->fetch()) {
+                $rows[$rowNum][$tableCol] = ($dao->single_family * 5000) + ($dao->multi_family * 10000);
+              }
            }
            else {
              $sql = sprintf(
