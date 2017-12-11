@@ -1003,7 +1003,6 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
    * @param array $rows
    */
   public function alterCustomDataDisplay(&$rows) {
-    CRM_Core_Error::debug_var('sd', CRM_Core_DAO::executeQuery("SELECT * $this->_tempTableToStoreActivityIDs")->fetchAll());
     // custom code to alter rows having custom values
     if (empty($this->_customGroupExtends)) {
       return;
