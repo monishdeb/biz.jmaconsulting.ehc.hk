@@ -325,8 +325,8 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
     }
 
     if ($addFields) {
-      $this->_columns['civicrm_value_children_information_5']['fields'] = array_merge(
-        $this->_columns['civicrm_value_children_information_5']['fields'],
+      $this->_columns['civicrm_value_healthy_kids_information_1']['fields'] = array_merge(
+        $this->_columns['civicrm_value_healthy_kids_information_1']['fields'],
         array(
           'under_17_lead_hazard' => array(
             'title' => ts('Children under 17 <br/> with lead hazard'),
@@ -351,8 +351,8 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
         )
       );
       $this->_specialCustomFields['civicrm_value_property_specifics_3_lead_mitigation_investment'] = 'Money';
-      $this->_specialCustomFields['civicrm_value_children_information_5_under_17_lead_hazard'] = 'Int';
-      $this->_specialCustomFields['civicrm_value_children_information_5_under_17_affected_children'] = 'Int';
+      $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_under_17_lead_hazard'] = 'Int';
+      $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_under_17_affected_children'] = 'Int';
     }
   }
 
@@ -994,7 +994,6 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
         break;
       }
     }
-    CRM_Core_Error::debug_var('sdas', CRM_Core_DAO::executeQuery("SELECT * FROM $this->_tempTableToStoreActivityIDs ")->fetchAll());
   }
 
   /**
@@ -1048,16 +1047,16 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
           $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE year = '$year' AND activity_type_id = $activityTypeID ");
           $selectColumn = $this->_specialCustomFields[$tableCol] == 'Boolean' ? "COUNT(%s = 1)" : "SUM(%s)";
           if ($contactIds) {
-           if (in_array($tableCol, array('civicrm_value_children_information_5_under_17_lead_hazard', 'civicrm_value_children_information_5_under_17_affected_children'))) {
+           if (in_array($tableCol, array('civicrm_value_healthy_kids_information_1_under_17_lead_hazard', 'civicrm_value_healthy_kids_information_1_under_17_affected_children'))) {
              $whereClause = "lead_hazard_present_7 = 1";
-             if ($tableCol == 'civicrm_value_children_information_5_under_17_affected_children') {
+             if ($tableCol == 'civicrm_value_healthy_kids_information_1_under_17_affected_children') {
                $whereClause = " (lead_hazard_present_7 = 1 OR moisture_hazards_9 = 1 OR pesticides_used_11 = 1 OR cockroaches_present_10 = 1 OR toxic_cleaners_used_12 = 1) ";
              }
              $sql = sprintf(
                "SELECT SUM(number_of_children_under_6_52) as under_6, SUM(number_of_occupants_aged_6_17_54) as under_17
-                  FROM civicrm_value_children_information_5
-                  INNER JOIN civicrm_value_healthy_kids_information_1 ON civicrm_value_healthy_kids_information_1.entity_id = civicrm_value_children_information_5.entity_id
-                 WHERE civicrm_value_children_information_5.entity_id IN (%s) AND %s ",
+                  FROM civicrm_value_healthy_kids_information_1
+                  INNER JOIN civicrm_value_healthy_kids_information_1 ON civicrm_value_healthy_kids_information_1.entity_id = civicrm_value_healthy_kids_information_1.entity_id
+                 WHERE civicrm_value_healthy_kids_information_1.entity_id IN (%s) AND %s ",
                $contactIds,
                $whereClause
              );
