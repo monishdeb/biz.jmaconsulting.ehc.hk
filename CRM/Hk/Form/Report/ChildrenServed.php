@@ -328,12 +328,12 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
       $this->_columns['civicrm_value_healthy_kids_information_1']['fields'] = array_merge(
         $this->_columns['civicrm_value_healthy_kids_information_1']['fields'],
         array(
-          'under_17_lead_hazard' => array(
+          'u17_lh' => array(
             'title' => ts('Children under 17 <br/> with lead hazard'),
             'type' => CRM_Utils_Type::T_INT,
             'dbAlias' => '0',
           ),
-          'under_17_affected_children' => array(
+          'u17_ac' => array(
             'title' => ts('Affected children under 17'),
             'type' => CRM_Utils_Type::T_INT,
             'dbAlias' => '0',
@@ -351,8 +351,8 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
         )
       );
       $this->_specialCustomFields['civicrm_value_property_specifics_3_lead_mitigation_investment'] = 'Money';
-      $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_under_17_lead_hazard'] = 'Int';
-      $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_under_17_affected_children'] = 'Int';
+      $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_u17_lh'] = 'Int';
+      $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_u17_ac'] = 'Int';
     }
   }
 
@@ -1047,9 +1047,9 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
           $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE year = '$year' AND activity_type_id = $activityTypeID ");
           $selectColumn = $this->_specialCustomFields[$tableCol] == 'Boolean' ? "COUNT(%s = 1)" : "SUM(%s)";
           if ($contactIds) {
-           if (in_array($tableCol, array('civicrm_value_healthy_kids_information_1_under_17_lead_hazard', 'civicrm_value_healthy_kids_information_1_under_17_affected_children'))) {
+           if (in_array($tableCol, array('civicrm_value_healthy_kids_information_1_u17_lh', 'civicrm_value_healthy_kids_information_1_u17_ac'))) {
              $whereClause = "lead_hazard_present_7 = 1";
-             if ($tableCol == 'civicrm_value_healthy_kids_information_1_under_17_affected_children') {
+             if ($tableCol == 'civicrm_value_healthy_kids_information_1_u17_ac') {
                $whereClause = " (lead_hazard_present_7 = 1 OR moisture_hazards_9 = 1 OR pesticides_used_11 = 1 OR cockroaches_present_10 = 1 OR toxic_cleaners_used_12 = 1) ";
              }
              $sql = sprintf(
