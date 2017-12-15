@@ -338,14 +338,14 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
             'type' => CRM_Utils_Type::T_INT,
             'dbAlias' => '0',
           ),
-          'lead_mitigation_investment' => array(
+          'lmt' => array(
             'title' => ts('Lead Mitigation Investment'),
             'type' => CRM_Utils_Type::T_MONEY,
             'dbAlias' => '0',
           ),
         )
       );
-      $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_lead_mitigation_investment'] = 'Money';
+      $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_lmt'] = 'Money';
       $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_u17_lh'] = 'Int';
       $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_u17_ac'] = 'Int';
     }
@@ -1060,7 +1060,7 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
                $rows[$rowNum][$tableCol] = $dao->under_6 + $dao->under_17;
              }
            }
-           elseif ($tableCol == 'civicrm_value_healthy_kids_information_1_lead_mitigation_investment') {
+           elseif ($tableCol == 'civicrm_value_healthy_kids_information_1_lmt') {
              $sql = "SELECT COUNT(id) as count, property_type_28
               FROM civicrm_value_healthy_kids_information_1
               WHERE civicrm_value_healthy_kids_information_1.entity_id IN ($contactIds)
