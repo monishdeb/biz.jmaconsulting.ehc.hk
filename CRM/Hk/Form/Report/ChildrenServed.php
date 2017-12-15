@@ -338,11 +338,6 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
             'type' => CRM_Utils_Type::T_INT,
             'dbAlias' => '0',
           ),
-        )
-      );
-      $this->_columns['civicrm_value_property_specifics_3']['fields'] = array_merge(
-        $this->_columns['civicrm_value_property_specifics_3']['fields'],
-        array(
           'lead_mitigation_investment' => array(
             'title' => ts('Lead Mitigation Investment'),
             'type' => CRM_Utils_Type::T_MONEY,
@@ -350,7 +345,7 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
           ),
         )
       );
-      $this->_specialCustomFields['civicrm_value_property_specifics_3_lead_mitigation_investment'] = 'Money';
+      $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_lead_mitigation_investment'] = 'Money';
       $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_u17_lh'] = 'Int';
       $this->_specialCustomFields['civicrm_value_healthy_kids_information_1_u17_ac'] = 'Int';
     }
@@ -1065,10 +1060,10 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
                $rows[$rowNum][$tableCol] = $dao->under_6 + $dao->under_17;
              }
            }
-           elseif ($tableCol == 'civicrm_value_property_specifics_3_lead_mitigation_investment') {
+           elseif ($tableCol == 'civicrm_value_healthy_kids_information_1_lead_mitigation_investment') {
              $sql = "SELECT COUNT(id) as count, property_type_28
-              FROM civicrm_value_property_specifics_3
-              WHERE civicrm_value_property_specifics_3.entity_id IN ($contactIds)
+              FROM civicrm_value_healthy_kids_information_1
+              WHERE civicrm_value_healthy_kids_information_1.entity_id IN ($contactIds)
               GROUP BY property_type_28 ";
               $dao = CRM_Core_DAO::executeQuery($sql);
               $rows[$rowNum][$tableCol] = 0;
