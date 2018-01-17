@@ -11,10 +11,10 @@ return array (
     'params' =>
     array (
       'version' => 3,
-      'label' => 'Children Served Report',
-      'description' => 'Children Served Report (biz.jmaconsulting.hk)',
-      'class_name' => 'CRM_Hk_Form_Report_ChildrenServed',
-      'report_url' => 'children-served',
+      'label' => 'Families & Children’s Health Report',
+      'description' => 'Families & Children’s Health Report (biz.jmaconsulting.ehc.hk)',
+      'class_name' => 'CRM_Hk_Form_Report_FamiliesChildrensHealth',
+      'report_url' => 'families-childrens-health',
       'component' => '',
     ),
   ),
