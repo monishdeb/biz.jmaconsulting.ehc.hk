@@ -1,6 +1,6 @@
 <?php
 
-class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
+class CRM_Hk_Form_Report_FamiliesChildrensHealth extends CRM_Report_Form {
 
   protected $_addressField = FALSE;
 
@@ -96,20 +96,20 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
             ),
           ),
           'gender_male' => array(
-            'title' => ts('Number of Male'),
+            'title' => ts('Number of Males'),
             'dbAlias' => '0',
             'type' => CRM_Utils_Type::T_INT,
           ),
           'gender_female' => array(
-            'title' => ts('Number of Female'),
+            'title' => ts('Number of Females'),
             'dbAlias' => '0',
           ),
           'gender_other' => array(
-            'title' => ts('Number of Other gender'),
+            'title' => ts('Number of Other Gender'),
             'dbAlias' => '0',
           ),
           'gender_null' => array(
-            'title' => ts('Number of contacts with gender not entered'),
+            'title' => ts('Number with Gender Not Entered'),
             'dbAlias' => '0',
           ),
         ),
@@ -666,7 +666,7 @@ class CRM_Hk_Form_Report_ChildrenServed extends CRM_Report_Form {
       }
 
       if (!$contactFieldSelected) {
-        $errors['fields'] = ts('You cannot use "Add Contacts to Group" action unless contacts fields are selected.');
+        $errors['fields'] = ts('You cannot use "Add Contacts to Group" action unless contact fields are selected.');
       }
     }
     return $errors;
