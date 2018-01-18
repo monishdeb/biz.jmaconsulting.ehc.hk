@@ -756,13 +756,13 @@ class CRM_Hk_Form_Report_FamiliesChildrensHealth extends CRM_Report_Form {
     $this->_columnHeaders['civicrm_activity_duration_total'] = array('no_display' => 1);
 
     $this->_tempTableToStoreActivityIDs = CRM_Core_DAO::createTempTableName('civicrm_activity');
-    $sql = sprintf("CREATE TEMPORARY TABLE %s (year VARCHAR(4), activity_type_id INT(24), contact_ids  LONGTEXT) %s ",
+    $sql = sprintf("CREATE TEMPORARY TABLE %s (year VARCHAR(4), month VARCHAR(2), quarter VARCHAR(10), yearweek VARCHAR(10), activity_type_id INT(24), contact_ids  LONGTEXT) %s ",
       $this->_tempTableToStoreActivityIDs,
       $this->_databaseAttributes
     );
     CRM_Core_DAO::executeQuery($sql);
-    $sql = "INSERT INTO $this->_tempTableToStoreActivityIDs (year, activity_type_id, contact_ids)
-      SELECT YEAR(activity_civireport.activity_date_time), activity_civireport.activity_type_id, GROUP_CONCAT(DISTINCT contact_civireport.id)
+    $sql = "INSERT INTO $this->_tempTableToStoreActivityIDs (year, month, quarter, yearweek, activity_type_id, contact_ids)
+      SELECT YEAR(activity_civireport.activity_date_time), MONTH(activity_civireport.activity_date_time), QUARTER(activity_civireport.activity_date_time), YEARWEEK(activity_civireport.activity_date_time), activity_civireport.activity_type_id, GROUP_CONCAT(DISTINCT contact_civireport.id)
       {$this->_from} {$this->_where} {$this->_groupBy} {$this->_having} {$this->_orderBy} {$this->_limit}
     ";
     CRM_Core_DAO::executeQuery($sql);
@@ -930,9 +930,10 @@ class CRM_Hk_Form_Report_FamiliesChildrensHealth extends CRM_Report_Form {
         if (!array_key_exists($tableCol, $row)) {
           continue;
         }
-        $year = $row['civicrm_activity_activity_date_time_interval'];
+        $interval = $row['civicrm_activity_activity_date_time_interval'];
         $activityTypeID = $row['civicrm_activity_activity_type_id'];
-        $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE year = '$year' AND activity_type_id = $activityTypeID ");
+        $whereColumn = self::getTempTableWhereColumn();
+        $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE $whereColumn = '$interval' AND activity_type_id = $activityTypeID ");
         if ($contactIds) {
           $whereClause = '(1)';
           if ($tableCol == 'civicrm_activity_gender_male') {
@@ -991,6 +992,21 @@ class CRM_Hk_Form_Report_FamiliesChildrensHealth extends CRM_Report_Form {
     }
   }
 
+  public static function getTempTableWhereColumn() {
+    $whereColumn = 'year';
+    if (strstr($this->_groupBy, 'YEARWEEK(activity_civireport.activity_date_time)')) {
+      $whereColumn = 'yearweek';
+    }
+    elseif (strstr($this->_groupBy, 'MONTH(activity_civireport.activity_date_time)')) {
+      $whereColumn = 'month';
+    }
+    elseif (strstr($this->_groupBy, 'QUARTER(activity_civireport.activity_date_time)')) {
+      $whereColumn = 'quarter';
+    }
+
+    return $whereColumn;
+  }
+
   /**
    * Alter the way in which custom data fields are displayed.
    *
@@ -1036,10 +1052,11 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
     foreach ($rows as $rowNum => $row) {
       foreach ($row as $tableCol => $val) {
         if (array_key_exists($tableCol, $this->_specialCustomFields)) {
-          $year = $row['civicrm_activity_activity_date_time_interval'];
+          $interval = $row['civicrm_activity_activity_date_time_interval'];
           $activityTypeID = array_search($row['civicrm_activity_activity_type_id'], $activityType);
           $entryFound = TRUE;
-          $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE year = '$year' AND activity_type_id = $activityTypeID ");
+          $whereColumn = self::getTempTableWhereColumn();
+          $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE $whereColumn = '$interval' AND activity_type_id = $activityTypeID ");
           $selectColumn = $this->_specialCustomFields[$tableCol] == 'Boolean' ? "COUNT(%s = 1)" : "SUM(%s)";
           if ($contactIds) {
            if (in_array($tableCol, array('civicrm_value_healthy_kids_information_1_u17_lh', 'civicrm_value_healthy_kids_information_1_u17_ac'))) {
