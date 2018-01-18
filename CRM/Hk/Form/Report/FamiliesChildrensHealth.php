@@ -932,7 +932,7 @@ class CRM_Hk_Form_Report_FamiliesChildrensHealth extends CRM_Report_Form {
         }
         $interval = $row['civicrm_activity_activity_date_time_interval'];
         $activityTypeID = $row['civicrm_activity_activity_type_id'];
-        $whereColumn = self::getTempTableWhereColumn();
+        $whereColumn = self::getTempTableWhereColumn($this->_groupBy);
         $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE $whereColumn = '$interval' AND activity_type_id = $activityTypeID ");
         if ($contactIds) {
           $whereClause = '(1)';
@@ -992,15 +992,21 @@ class CRM_Hk_Form_Report_FamiliesChildrensHealth extends CRM_Report_Form {
     }
   }
 
-  public static function getTempTableWhereColumn() {
+  /**
+   * Return column name of the temptable later used in where clause to fetch contact IDs
+   *
+   * @param array $groupBy
+   * @return string
+   */
+  public static function getTempTableWhereColumn($groupBy) {
     $whereColumn = 'year';
-    if (strstr($this->_groupBy, 'YEARWEEK(activity_civireport.activity_date_time)')) {
+    if (strstr($groupBy, 'YEARWEEK(activity_civireport.activity_date_time)')) {
       $whereColumn = 'yearweek';
     }
-    elseif (strstr($this->_groupBy, 'MONTH(activity_civireport.activity_date_time)')) {
+    elseif (strstr($groupBy, 'MONTH(activity_civireport.activity_date_time)')) {
       $whereColumn = 'month';
     }
-    elseif (strstr($this->_groupBy, 'QUARTER(activity_civireport.activity_date_time)')) {
+    elseif (strstr($groupBy, 'QUARTER(activity_civireport.activity_date_time)')) {
       $whereColumn = 'quarter';
     }
 
@@ -1055,7 +1061,7 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
           $interval = $row['civicrm_activity_activity_date_time_interval'];
           $activityTypeID = array_search($row['civicrm_activity_activity_type_id'], $activityType);
           $entryFound = TRUE;
-          $whereColumn = self::getTempTableWhereColumn();
+          $whereColumn = self::getTempTableWhereColumn($this->_groupBy);
           $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE $whereColumn = '$interval' AND activity_type_id = $activityTypeID ");
           $selectColumn = $this->_specialCustomFields[$tableCol] == 'Boolean' ? "COUNT(%s = 1)" : "SUM(%s)";
           if ($contactIds) {
