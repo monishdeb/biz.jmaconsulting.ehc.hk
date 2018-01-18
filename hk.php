@@ -144,7 +144,7 @@ function hk_civicrm_preProcess($formName, &$form) {
  *
 function hk_civicrm_navigationMenu(&$menu) {
   _hk_civix_insert_navigation_menu($menu, NULL, array(
-    'label' => ts('The Page', array('domain' => 'biz.jmaconsulting.hk')),
+    'label' => ts('The Page', array('domain' => 'biz.jmaconsulting.ehc.hk')),
     'name' => 'the_page',
     'url' => 'civicrm/the-page',
     'permission' => 'access CiviReport,access CiviContribute',

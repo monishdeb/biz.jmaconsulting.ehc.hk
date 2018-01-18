@@ -1,4 +1,4 @@
-Package: biz.jmaconsulting.hk
+Package: biz.jmaconsulting.ehc.hk
 Copyright (C) 2017, deb.monish <deb.monish@gmail.com>
 Licensed under the GNU Affero Public License 3.0 (below).
 

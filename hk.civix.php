@@ -175,7 +175,7 @@ function _hk_civix_civicrm_managed(&$entities) {
     $es = include $file;
     foreach ($es as $e) {
       if (empty($e['module'])) {
-        $e['module'] = 'biz.jmaconsulting.hk';
+        $e['module'] = 'biz.jmaconsulting.ehc.hk';
       }
       $entities[] = $e;
     }
@@ -204,7 +204,7 @@ function _hk_civix_civicrm_caseTypes(&$caseTypes) {
       // throw new CRM_Core_Exception($errorMessage);
     }
     $caseTypes[$name] = array(
-      'module' => 'biz.jmaconsulting.hk',
+      'module' => 'biz.jmaconsulting.ehc.hk',
       'name' => $name,
       'file' => $file,
     );
@@ -230,7 +230,7 @@ function _hk_civix_civicrm_angularModules(&$angularModules) {
     $name = preg_replace(':\.ang\.php$:', '', basename($file));
     $module = include $file;
     if (empty($module['ext'])) {
-      $module['ext'] = 'biz.jmaconsulting.hk';
+      $module['ext'] = 'biz.jmaconsulting.ehc.hk';
     }
     $angularModules[$name] = $module;
   }

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<extension key="biz.jmaconsulting.hk" type="module">
+<extension key="biz.jmaconsulting.ehc.hk" type="module">
   <file>hk</file>
   <name>HK Customization</name>
   <description>Holds customization code for Healthy Kid site</description>
