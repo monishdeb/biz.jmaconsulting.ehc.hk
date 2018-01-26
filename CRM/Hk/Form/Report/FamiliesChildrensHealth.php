@@ -187,7 +187,7 @@ class CRM_Hk_Form_Report_FamiliesChildrensHealth extends CRM_Report_Form {
     }
 
     $sql = "
-  SELECT cg.table_name, cg.title, cg.extends, cf.id as cf_id, cf.label,
+  SELECT cg.table_name, cg.title, cg.extends, cf.id as cf_id, cf.label, cf.name,
        cf.column_name, cf.data_type, cf.html_type, cf.option_group_id, cf.time_format
   FROM   civicrm_custom_group cg
   INNER  JOIN civicrm_custom_field cf ON cg.id = cf.custom_group_id
@@ -227,6 +227,9 @@ class CRM_Hk_Form_Report_FamiliesChildrensHealth extends CRM_Report_Form {
           'dataType' => ($customDAO->data_type == 'Boolean') ? 'Int' : $customDAO->data_type,
           'htmlType' => $customDAO->html_type,
         );
+        if ($customDAO->name == 'Lead_Repair_amount') {
+          $curFields[$fieldName]['dbAlias'] = "SUM($customDAO->column_name)";
+        }
       }
       if ($this->_customGroupFilters) {
         // this makes aliasing work in favor
