@@ -38,7 +38,6 @@ Class CRM_HK_Activities_Import {
       ";
     }
     elseif ($this->activityTypeName == 'Eligibility Review') {
-      $activityParams['activity_type_id'] = 'HK Service';
       $sql = "
       SELECT healthy_homes_id as source_id,
         civicrm_contact_id as target_contact_id,
