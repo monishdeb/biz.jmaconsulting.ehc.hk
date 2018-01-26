@@ -34,7 +34,7 @@ Class CRM_HK_Activities_Import {
       WHERE Lead_Inspected_By_SDHC > 0 AND Overall_Services_Lead = 'Y'
       ");
       while ($dao->fetch()) {
-        $activityParams array_merge($activityParams, array(
+        $activityParams = array_merge($activityParams, array(
           'source_record_id' => $dao->source_id,
           'target_contact_id' => $dao->target_contact_id,
           'created_date' => $this->formatDate($dao->created_date),
