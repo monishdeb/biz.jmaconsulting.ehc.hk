@@ -71,7 +71,7 @@ Class CRM_HK_Activities_Import {
           'activity_date_time' => $this->formatDate($dao->activity_date),
         ));
         if ($activityParams['activity_type_id'] == 'Lead Hazard Mitigated') {
-          'custom_' . $repairAmountCustomFieldId => $dao->repair_amount,
+          $activityParams['custom_' . $repairAmountCustomFieldId] = $dao->repair_amount;
         }
         civicrm_api3('Activity', 'create', $activityParams);
       }
