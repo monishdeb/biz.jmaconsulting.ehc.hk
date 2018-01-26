@@ -34,7 +34,7 @@ Class CRM_HK_Activities_Import {
         Case_create_date as created_date,
         Lead_Visual_Inspection_Date as activity_date
       FROM `TABLE 339`
-      WHERE Lead_Inspected_By_SDHC > 0 AND Overall_Services_Lead = 'Y'
+      WHERE Overall_Services_Lead = 'Y'
       ";
     }
     elseif ($this->activityTypeName == 'Eligibility Review') {
