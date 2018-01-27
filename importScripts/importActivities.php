@@ -39,24 +39,27 @@ Class CRM_HK_Activities_Import {
     }
     elseif ($this->activityTypeName == 'Eligibility Review') {
       $sql = "
-      SELECT healthy_homes_id as source_id,
-        civicrm_contact_id as target_contact_id,
-        Case_create_date as created_date,
-        Income_Verification_Date as activity_date
-      FROM `TABLE 339`
-      WHERE Income_Qualifies = 'Y' AND civicrm_contact_id IS NOT NULL AND Income_Verification_Date <> ''
+      SELECT
+          import.entity_id as target_contact_id,
+          case_create_date_16 as created_date,
+          income_verification_date_55 as activity_date
+        FROM civicrm_value_healthy_kids_import_information_2 import
+        INNER JOIN civicrm_value_income_information_6 income ON import.entity_id = income.entity_id
+        WHERE income_qualifies__58 = 1 AND import.entity_id IS NOT NULL AND income_verification_date_55 <> ''
       ";
     }
     elseif ($this->activityTypeName == 'Lead Remediation') {
       $activityParams['activity_type_id'] = 'Lead Hazard Mitigated';
       $sql = "
-      SELECT healthy_homes_id as source_id,
-        civicrm_contact_id as target_contact_id,
-        Case_create_date as created_date,
-        Lead_Visual_Inspection_Date as activity_date,
-        Housing_Investment_Lead_repairs as repair_amount
-      FROM `TABLE 339`
-      WHERE Housing_Investment_Lead_repairs > 0 AND civicrm_contact_id IS NOT NULL AND Lead_Visual_Inspection_Date <> ''
+      SELECT
+          import.entity_id as target_contact_id,
+          case_create_date_16 as created_date,
+          lead_visual_inspection_date_260 as activity_date,
+          annual_income_56 as repair_amount
+        FROM civicrm_value_healthy_kids_import_information_2 import
+        INNER JOIN civicrm_value_healthy_kids_information_1 hki ON hki.entity_id = import.entity_id
+        INNER JOIN civicrm_value_income_information_6 income ON import.entity_id = income.entity_id
+        WHERE annual_income_56 > 0 AND import.entity_id IS NOT NULL AND lead_visual_inspection_date_260 <> ''
       ";
     }
 
@@ -64,10 +67,9 @@ Class CRM_HK_Activities_Import {
       $dao = CRM_Core_DAO::executeQuery($sql);
       while ($dao->fetch()) {
         $activityParams = array_merge($activityParams, array(
-          'source_record_id' => $dao->source_id,
           'target_contact_id' => $dao->target_contact_id,
-          'created_date' => $this->formatDate($dao->created_date),
-          'activity_date_time' => $this->formatDate($dao->activity_date),
+          'created_date' => $dao->created_date,
+          'activity_date_time' => $dao->activity_date,
         ));
         if ($activityParams['activity_type_id'] == 'Lead Hazard Mitigated') {
           $activityParams['custom_' . $this->repairAmountCustomFieldId] = $dao->repair_amount;
