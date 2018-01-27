@@ -34,7 +34,7 @@ Class CRM_HK_Activities_Import {
         Case_create_date as created_date,
         Lead_Visual_Inspection_Date as activity_date
       FROM `TABLE 339`
-      WHERE Overall_Services_Lead = 'Y'
+      WHERE Lead_Inspected_By_SDHC > 0 AND Overall_Services_Lead = 'Y'
       ";
     }
     elseif ($this->activityTypeName == 'Eligibility Review') {
@@ -82,7 +82,12 @@ Class CRM_HK_Activities_Import {
   */
   protected function formatDate($dateString) {
     $dateString = explode('/', $dateString);
-    $dateString = implode('-', array($dateString[1], $dateString[0], $dateString[2]));
+    if (empty($dateString[0]) || $dateString[1]) {
+      $dateString = '01-01-1900';
+    }
+    else {
+      $dateString = implode('-', array($dateString[1], $dateString[0], $dateString[2]));
+    }
     $date = date('Ymd', strtotime($dateString));
     return $date;
   }
