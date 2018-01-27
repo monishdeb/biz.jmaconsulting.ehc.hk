@@ -82,7 +82,7 @@ Class CRM_HK_Activities_Import {
   */
   protected function formatDate($dateString) {
     $dateString = explode('/', $dateString);
-    if (empty($dateString[0]) || $dateString[1]) {
+    if (empty($dateString[0]) || empty($dateString[1])) {
       $dateString = '01-01-1900';
     }
     else {
