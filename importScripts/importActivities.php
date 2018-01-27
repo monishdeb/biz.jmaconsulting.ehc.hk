@@ -81,7 +81,8 @@ Class CRM_HK_Activities_Import {
   * Build Date using string.
   */
   protected function formatDate($dateString) {
-    $dateString = str_replace('/', '-', $dateString);
+    $dateString = explode('/', $dateString);
+    $dateString = implode('-', array($dateString[1], $dateString[0], $dateString[2]));
     $date = date('Ymd', strtotime($dateString));
     return $date;
   }
