@@ -4,7 +4,10 @@ Class CRM_HK_Activities_Import {
   public $civicrmPath = '';
   public $sourceContactId = '';
   public $activityTypeName = '';
+  // used for 'Lead Remediation' activity type
   public $repairAmountCustomFieldId = '';
+  // used for 'Healthy Kids Outreach Event' activity type
+  public $importEntity = 'Event';
 
   function __construct() {
     // you can run this program either from an apache command, or from the cli
@@ -62,6 +65,33 @@ Class CRM_HK_Activities_Import {
         WHERE annual_income_56 > 0 AND import.entity_id IS NOT NULL AND lead_visual_inspection_date_260 <> ''
       ";
     }
+    elseif ($this->activityTypeName == 'Healthy Kids Outreach Event') {
+      if ($this->importEntity == 'Event') {
+        $sql = "
+        SELECT e.id as source_id,
+          e.title as subject,
+          p.register_date as created_date,
+          e.start_date as activity_date,
+          p.contact_id as target_contact_id
+          FROM civicrm_event e
+           INNER JOIN civicrm_participant p on e.id=p.event_id
+          WHERE e.title LIKE '%hk%'
+        ";
+      }
+      else {
+        $sql = "
+        SELECT t.id as source_id,
+          t.name as subject,
+          t.created_date as created_date,
+          t.created_date as activity_date,
+          et.entity_id as target_contact_id
+          FROM civicrm_tag t
+           INNER JOIN civicrm_entity_tag et ON t.id = et.tag_id AND et.entity_table = 'civicrm_contact'
+          WHERE t.name LIKE '%HK%'
+        ";
+      }
+
+    }
 
     if ($sql) {
       $dao = CRM_Core_DAO::executeQuery($sql);
@@ -73,6 +103,24 @@ Class CRM_HK_Activities_Import {
         ));
         if ($activityParams['activity_type_id'] == 'Lead Hazard Mitigated') {
           $activityParams['custom_' . $this->repairAmountCustomFieldId] = $dao->repair_amount;
+        }
+        elseif ($this->activityTypeName == 'Healthy Kids Outreach Event') {
+          if ($this->importEntity == 'Tag') {
+            if (strstr($dao->subject, 'July 2014')) {
+              $activityParams['activity_date_time'] = '20140701' . date('His');
+            }
+            elseif (strstr($dao->subject, '11.16.17')) {
+              $activityParams['activity_date_time'] = '20171116' . date('His');
+            }
+            elseif (strstr($dao->subject, '10/26/2015')) {
+              $activityParams['activity_date_time'] = '20151026' . date('His');
+            }
+            elseif (strstr($dao->subject, '10/12/2015')) {
+              $activityParams['activity_date_time'] = '20151012' . date('His');
+            }
+          }
+          $activityParams['subject'] = $dao->subject;
+          $activityParams['source_contact_id'] = $dao->source_id;
         }
         civicrm_api3('Activity', 'create', $activityParams);
       }
