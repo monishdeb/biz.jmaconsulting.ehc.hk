@@ -120,7 +120,7 @@ Class CRM_HK_Activities_Import {
             }
           }
           $activityParams['subject'] = $dao->subject;
-          $activityParams['source_contact_id'] = $dao->source_id;
+          $activityParams['source_record_id'] = $dao->source_id;
         }
         civicrm_api3('Activity', 'create', $activityParams);
       }
