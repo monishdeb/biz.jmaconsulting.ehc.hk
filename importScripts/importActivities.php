@@ -115,7 +115,7 @@ Class CRM_HK_Activities_Import {
         if ($activityParams['activity_type_id'] == 'Lead Hazard Mitigated') {
           $activityParams['custom_' . $this->repairAmountCustomFieldId] = $dao->repair_amount;
         }
-        elseif (in_array($this->activityTypeName, array('Healthy Kids Outreach Event', 'Organising Event')) {
+        elseif (in_array($this->activityTypeName, array('Healthy Kids Outreach Event', 'Organising Event'))) {
           if ($this->importEntity == 'Tag') {
             if (strstr($dao->subject, 'July 2014')) {
               $activityParams['activity_date_time'] = '20140701' . date('His');
