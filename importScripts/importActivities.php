@@ -143,7 +143,7 @@ Class CRM_HK_Activities_Import {
         elseif (in_array($this->activityTypeName, array('Healthy Kids Outreach Event', 'Organising Event', 'SALTA', 'Sign Card', 'Petition'))) {
           if ($this->activityTypeName == 'SALTA') {
             $stringReplaceMap = array(
-              '2009 ' => '20090101' . date('His'),
+              '2009' => '20090101' . date('His'),
               '2007' => '20070101' . date('His'),
               '2012' => '20120101' . date('His'),
               '10-20-11' => '20101020' . date('His'),
@@ -161,7 +161,7 @@ Class CRM_HK_Activities_Import {
           }
           elseif ($this->activityTypeName == 'Petition') {
             $stringReplaceMap = array(
-              'Petition2015 ' => '20150101' . date('His'),
+              'Petition2015' => '20150101' . date('His'),
               '2016' => '20160101' . date('His'),
             );
             foreach ($stringReplaceMap as $needle => $replaceDate) {
