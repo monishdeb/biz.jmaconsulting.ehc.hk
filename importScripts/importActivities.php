@@ -173,7 +173,7 @@ Class CRM_HK_Activities_Import {
           }
           elseif ($this->activityTypeName == 'Sign Card') {
             $stringReplaceMap = array(
-              'MemberCard2015 ' => '20150101' . date('His'),
+              'MemberCard2015' => '20150101' . date('His'),
             );
             foreach ($stringReplaceMap as $needle => $replaceDate) {
               if (strstr($dao->subject, $needle)) {
@@ -182,7 +182,7 @@ Class CRM_HK_Activities_Import {
               }
             }
           }
-          elseif ($this->importEntity == 'Tag' && $this->activityTypeName == 'Organising Event') {
+          elseif ($this->importEntity == 'Tag' && in_array($this->activityTypeName, array('Organising Event', 'Healthy Kids Outreach Event'))) {
             $stringReplaceMap = array(
               'July 2014' => '20140701' . date('His'),
               '11.16.17' => '20171116' . date('His'),
