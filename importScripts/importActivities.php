@@ -199,7 +199,7 @@ Class CRM_HK_Activities_Import {
             }
             $dao->subject = str_replace(array_keys($stringReplaceMap), '', $dao->subject);
           }
-          $activityParams['subject'] = str_replace(array('HS', '.', 'Card', '_'), array('', ' ', '', ''), $dao->subject);
+          $activityParams['subject'] = str_replace(array('HS', '.', 'Card', '_'), array('', ' ', '', ' '), $dao->subject);
           $activityParams['source_record_id'] = $dao->source_id;
         }
         civicrm_api3('Activity', 'create', $activityParams);
