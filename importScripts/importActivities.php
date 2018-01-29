@@ -140,8 +140,8 @@ Class CRM_HK_Activities_Import {
         if ($activityParams['activity_type_id'] == 'Lead Remediation') {
           $activityParams['custom_' . $this->repairAmountCustomFieldId] = $dao->repair_amount;
         }
-        elseif (in_array($this->activityTypeName, array('Healthy Kids Outreach Event', 'Organising Event'))) {
-          if ($this->importEntity == 'Tag' || $this->activityTypeName == 'SALTA') {
+        elseif (in_array($this->activityTypeName, array('Healthy Kids Outreach Event', 'Organising Event', 'SALTA', 'Sign Card', 'Petition'))) {
+          if (($this->importEntity == 'Tag' && $this->activityTypeName == 'Organising Event') || $this->activityTypeName == 'SALTA') {
             if ($this->activityTypeName == 'SALTA') {
               $stringReplaceMap = array(
                 '2009 ' => '20090101' . date('His'),
@@ -152,6 +152,29 @@ Class CRM_HK_Activities_Import {
                 '11-19-07' => '20060101' . date('His'),
                 'graduates 06' => '20060101' . date('His'),
                 '4.1.17' => '20170104' . date('His'),
+              );
+              foreach ($stringReplaceMap as $needle => $replaceDate) {
+                if (strstr($dao->subject, $needle)) {
+                  $activityParams['activity_date_time'] = $replaceDate;
+                  break;
+                }
+              }
+            }
+            elseif ($this->activityTypeName == 'Petition') {
+              $stringReplaceMap = array(
+                'Petition2015 ' => '20150101' . date('His'),
+                '2016' => '20160101' . date('His'),
+              );
+              foreach ($stringReplaceMap as $needle => $replaceDate) {
+                if (strstr($dao->subject, $needle)) {
+                  $activityParams['activity_date_time'] = $replaceDate;
+                  break;
+                }
+              }
+            }
+            elseif ($this->activityTypeName == 'Sign Card') {
+              $stringReplaceMap = array(
+                'MemberCard2015 ' => '20150101' . date('His'),
               );
               foreach ($stringReplaceMap as $needle => $replaceDate) {
                 if (strstr($dao->subject, $needle)) {
@@ -175,8 +198,8 @@ Class CRM_HK_Activities_Import {
               }
             }
             $dao->subject = str_replace(array_keys($stringReplaceMap), '', $dao->subject);
-            $activityParams['subject'] = str_replace(array('HS', '.'), array('', ' '), $dao->subject);
           }
+          $activityParams['subject'] = str_replace(array('HS', '.', 'Card'), array('', ' ', ''), $dao->subject);
           $activityParams['source_record_id'] = $dao->source_id;
         }
         civicrm_api3('Activity', 'create', $activityParams);
