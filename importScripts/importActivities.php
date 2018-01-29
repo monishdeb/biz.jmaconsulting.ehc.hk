@@ -68,13 +68,13 @@ Class CRM_HK_Activities_Import {
     elseif ($this->activityTypeName == 'Healthy Kids Outreach Event') {
       if ($this->importEntity == 'Event') {
         $sql = "
-        SELECT e.id as source_id,
+        SELECT p.id as source_id,
           e.title as subject,
           p.register_date as created_date,
           e.start_date as activity_date,
           p.contact_id as target_contact_id
           FROM civicrm_event e
-           INNER JOIN civicrm_participant p on e.id=p.event_id
+           INNER JOIN civicrm_participant p on e.id = p.event_id
           WHERE e.title LIKE '%hk%'
         ";
       }
@@ -90,7 +90,18 @@ Class CRM_HK_Activities_Import {
           WHERE t.name LIKE '%HK%'
         ";
       }
-
+    }
+    elseif ($this->activityTypeName == 'Organising Event') {
+      $sql = "
+      SELECT p.id as source_id,
+          e.title as subject,
+          p.register_date as created_date,
+          e.start_date as activity_date,
+          p.contact_id as target_contact_id
+          FROM civicrm_event e
+           INNER JOIN civicrm_participant p on e.id=p.event_id
+          WHERE e.title NOT LIKE '%hk%' AND e.title NOT LIKE '%fake%' AND e.title NOT LIKE '%test%'
+      ";
     }
 
     if ($sql) {
@@ -104,7 +115,7 @@ Class CRM_HK_Activities_Import {
         if ($activityParams['activity_type_id'] == 'Lead Hazard Mitigated') {
           $activityParams['custom_' . $this->repairAmountCustomFieldId] = $dao->repair_amount;
         }
-        elseif ($this->activityTypeName == 'Healthy Kids Outreach Event') {
+        elseif (in_array($this->activityTypeName, array('Healthy Kids Outreach Event', 'Organising Event')) {
           if ($this->importEntity == 'Tag') {
             if (strstr($dao->subject, 'July 2014')) {
               $activityParams['activity_date_time'] = '20140701' . date('His');
