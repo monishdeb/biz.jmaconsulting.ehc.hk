@@ -30,7 +30,6 @@ Class CRM_HK_Activities_Import {
     ];
     $sql = NULL;
     if ($this->activityTypeName == 'Lead Assessment') {
-      $activityParams['activity_type_id'] = 'HK Service';
       $sql = "
       SELECT healthy_homes_id as source_id,
         civicrm_contact_id as target_contact_id,
@@ -136,8 +135,8 @@ Class CRM_HK_Activities_Import {
       while ($dao->fetch()) {
         $activityParams = array_merge($activityParams, array(
           'target_contact_id' => $dao->target_contact_id,
-          'created_date' => $dao->created_date,
-          'activity_date_time' => $dao->activity_date,
+          'created_date' => $this->formatDate($dao->created_date),
+          'activity_date_time' => $this->formatDate($dao->activity_date),
         ));
         if ($activityParams['activity_type_id'] == 'Lead Hazard Mitigated') {
           $activityParams['custom_' . $this->repairAmountCustomFieldId] = $dao->repair_amount;
@@ -190,6 +189,9 @@ Class CRM_HK_Activities_Import {
   * Build Date using string.
   */
   protected function formatDate($dateString) {
+    if (!in_array($this->activityTypeName, array('Lead Assessment', 'Eligibility Review', 'Lead Remediation'))) {
+      return $dateString;
+    }
     $dateString = explode('/', $dateString);
     if (empty($dateString[0]) || empty($dateString[1])) {
       $dateString = '01-01-1900';
