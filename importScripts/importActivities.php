@@ -116,7 +116,7 @@ Class CRM_HK_Activities_Import {
         ";
       }
     }
-    elseif (in_array($this->activityTypeName, array('SALTA', 'Sign Card', 'Petition')) {
+    elseif (in_array($this->activityTypeName, array('SALTA', 'Sign Card', 'Petition'))) {
       $searchString = ($this->activityTypeName == 'Sign Card') ? 'Card' : $this->activityTypeName;
       $sql = "
       SELECT t.id as source_id,
