@@ -758,18 +758,6 @@ class CRM_Hk_Form_Report_FamiliesChildrensHealth extends CRM_Report_Form {
     // finally add duration total to column headers
     $this->_columnHeaders['civicrm_activity_duration_total'] = array('no_display' => 1);
 
-    $this->_tempTableToStoreActivityIDs = CRM_Core_DAO::createTempTableName('civicrm_activity');
-    $sql = sprintf("CREATE TEMPORARY TABLE %s (year VARCHAR(4), month VARCHAR(2), quarter VARCHAR(10), yearweek VARCHAR(10), activity_type_id INT(24), contact_ids  LONGTEXT) %s ",
-      $this->_tempTableToStoreActivityIDs,
-      $this->_databaseAttributes
-    );
-    CRM_Core_DAO::executeQuery($sql);
-    $sql = "INSERT INTO $this->_tempTableToStoreActivityIDs (year, month, quarter, yearweek, activity_type_id, contact_ids)
-      SELECT YEAR(activity_civireport.activity_date_time), MONTH(activity_civireport.activity_date_time), QUARTER(activity_civireport.activity_date_time), YEARWEEK(activity_civireport.activity_date_time), activity_civireport.activity_type_id, GROUP_CONCAT(DISTINCT contact_civireport.id)
-      {$this->_from} {$this->_where} {$this->_groupBy} {$this->_having} {$this->_orderBy} {$this->_limit}
-    ";
-    CRM_Core_DAO::executeQuery($sql);
-
     $this->buildRows($query, $rows);
 
     // format result set.
@@ -929,29 +917,8 @@ class CRM_Hk_Form_Report_FamiliesChildrensHealth extends CRM_Report_Form {
         'civicrm_activity_gender_other',
         'civicrm_activity_gender_null',
       ) as $tableCol) {
-        $entryFound = TRUE;
         if (!array_key_exists($tableCol, $row)) {
           continue;
-        }
-        $interval = $row['civicrm_activity_activity_date_time_interval'];
-        $activityTypeID = $row['civicrm_activity_activity_type_id'];
-        $whereColumn = self::getTempTableWhereColumn($this->_groupBy);
-        $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE $whereColumn = '$interval' AND activity_type_id = $activityTypeID ");
-        if ($contactIds) {
-          $whereClause = '(1)';
-          if ($tableCol == 'civicrm_activity_gender_male') {
-            $whereClause = "gender_id = " . CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Male');
-          }
-          elseif ($tableCol == 'civicrm_activity_gender_female') {
-            $whereClause = "gender_id = " . CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Female');
-          }
-          elseif ($tableCol == 'civicrm_activity_gender_other') {
-            $whereClause = sprintf("gender_id NOT IN (%d, %d)", CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Male'), CRM_Core_PseudoConstant::getKey('CRM_Contact_DAO_Contact', 'gender_id', 'Female'));
-          }
-          elseif ($tableCol == 'civicrm_activity_gender_null') {
-            $whereClause = "gender_id IS NULL";
-          }
-          $rows[$rowNum][$tableCol] = CRM_Core_DAO::singleValueQuery("SELECT COUNT(id) FROM civicrm_contact WHERE id IN ($contactIds) AND $whereClause ");
         }
       }
 
@@ -1060,60 +1027,7 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
     $activityType = CRM_Core_PseudoConstant::activityType(TRUE, TRUE, FALSE, 'label', TRUE);
     foreach ($rows as $rowNum => $row) {
       foreach ($row as $tableCol => $val) {
-        if (array_key_exists($tableCol, $this->_specialCustomFields)) {
-          $interval = $row['civicrm_activity_activity_date_time_interval'];
-          $activityTypeID = array_search($row['civicrm_activity_activity_type_id'], $activityType);
-          $entryFound = TRUE;
-          $whereColumn = self::getTempTableWhereColumn($this->_groupBy);
-          $contactIds = CRM_Core_DAO::singleValueQuery("SELECT contact_ids FROM $this->_tempTableToStoreActivityIDs WHERE $whereColumn = '$interval' AND activity_type_id = $activityTypeID ");
-          $selectColumn = $this->_specialCustomFields[$tableCol] == 'Boolean' ? "COUNT(%s = 1)" : "SUM(%s)";
-          if ($contactIds) {
-           if (in_array($tableCol, array('civicrm_value_healthy_kids_information_1_u17_lh', 'civicrm_value_healthy_kids_information_1_u17_ac'))) {
-             $whereClause = "lead_hazard_present_7 = 1";
-             if ($tableCol == 'civicrm_value_healthy_kids_information_1_u17_ac') {
-               $whereClause = " (lead_hazard_present_7 = 1 OR moisture_hazards_9 = 1 OR pesticides_used_11 = 1 OR cockroaches_present_10 = 1 OR toxic_cleaners_used_12 = 1) ";
-             }
-             $sql = sprintf(
-               "SELECT SUM(number_of_children_under_6_52) as under_6, SUM(number_of_occupants_aged_6_17_54) as under_17
-                  FROM civicrm_value_healthy_kids_information_1
-                  INNER JOIN civicrm_value_healthy_kids_information_1 ON civicrm_value_healthy_kids_information_1.entity_id = civicrm_value_healthy_kids_information_1.entity_id
-                 WHERE civicrm_value_healthy_kids_information_1.entity_id IN (%s) AND %s ",
-               $contactIds,
-               $whereClause
-             );
-             $dao = CRM_Core_DAO::executeQuery($sql);
-             while($dao->fetch()) {
-               $rows[$rowNum][$tableCol] = $dao->under_6 + $dao->under_17;
-             }
-           }
-           elseif ($tableCol == 'civicrm_value_healthy_kids_information_1_lmt') {
-             $sql = "SELECT COUNT(id) as count, property_type_28
-              FROM civicrm_value_healthy_kids_information_1
-              WHERE civicrm_value_healthy_kids_information_1.entity_id IN ($contactIds)
-              GROUP BY property_type_28 ";
-              $dao = CRM_Core_DAO::executeQuery($sql);
-              $rows[$rowNum][$tableCol] = 0;
-              while($dao->fetch()) {
-                if ($dao->property_type_28 == 22) {
-                  $rows[$rowNum][$tableCol] += $dao->count * 5000;
-                }
-                elseif ($dao->property_type_28 == 23) {
-                  $rows[$rowNum][$tableCol] += $dao->count * 10000;
-                }
-              }
-           }
-           else {
-             $sql = sprintf(
-               "SELECT $selectColumn FROM %s WHERE entity_id IN (%s) ",
-               $dao->column_name,
-               $dao->table_name,
-               $contactIds
-             );
-             $rows[$rowNum][$tableCol] = CRM_Core_DAO::singleValueQuery($sql);
-           }
-          }
-        }
-        elseif (array_key_exists($tableCol, $customFields)) {
+        if (array_key_exists($tableCol, $customFields)) {
           $rows[$rowNum][$tableCol] = CRM_Core_BAO_CustomField::displayValue($val, $customFields[$tableCol]);
           $entryFound = TRUE;
         }
