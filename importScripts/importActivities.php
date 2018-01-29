@@ -50,7 +50,6 @@ Class CRM_HK_Activities_Import {
       ";
     }
     elseif ($this->activityTypeName == 'Lead Remediation') {
-      $activityParams['activity_type_id'] = 'Lead Hazard Mitigated';
       $sql = "
       SELECT healthy_homes_id as source_id,
          civicrm_contact_id as target_contact_id,
@@ -138,7 +137,7 @@ Class CRM_HK_Activities_Import {
           'created_date' => $this->formatDate($dao->created_date),
           'activity_date_time' => $this->formatDate($dao->activity_date),
         ));
-        if ($activityParams['activity_type_id'] == 'Lead Hazard Mitigated') {
+        if ($activityParams['activity_type_id'] == 'Lead Remediation') {
           $activityParams['custom_' . $this->repairAmountCustomFieldId] = $dao->repair_amount;
         }
         elseif (in_array($this->activityTypeName, array('Healthy Kids Outreach Event', 'Organising Event'))) {
