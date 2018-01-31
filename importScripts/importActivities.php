@@ -63,11 +63,12 @@ Class CRM_HK_Activities_Import {
     elseif ($this->activityTypeName == 'Healthy Kids Outreach Event') {
       if ($this->importEntity == 'Event') {
         $sql = "
-        SELECT p.id as source_id,
+        SELECT
           e.title as subject,
           p.register_date as created_date,
           e.start_date as activity_date,
-          p.contact_id as target_contact_id
+          p.contact_id as target_contact_id,
+          p.contact_id as source_id
           FROM civicrm_event e
            INNER JOIN civicrm_participant p on e.id = p.event_id
           WHERE e.title LIKE '%hk%'
@@ -75,11 +76,12 @@ Class CRM_HK_Activities_Import {
       }
       else {
         $sql = "
-        SELECT t.id as source_id,
+        SELECT
           t.name as subject,
           t.created_date as created_date,
           t.created_date as activity_date,
-          et.entity_id as target_contact_id
+          et.entity_id as target_contact_id,
+          et.entity_id as source_id
           FROM civicrm_tag t
            INNER JOIN civicrm_entity_tag et ON t.id = et.tag_id AND et.entity_table = 'civicrm_contact'
            INNER JOIN civicrm_contact cc ON cc.id = et.entity_id
@@ -90,11 +92,12 @@ Class CRM_HK_Activities_Import {
     elseif ($this->activityTypeName == 'Organising Event') {
       if ($this->importEntity == 'Event') {
         $sql = "
-        SELECT p.id as source_id,
+        SELECT
             e.title as subject,
             p.register_date as created_date,
             e.start_date as activity_date,
-            p.contact_id as target_contact_id
+            p.contact_id as target_contact_id,
+            p.contact_id as source_id
             FROM civicrm_event e
              INNER JOIN civicrm_participant p on e.id=p.event_id
             WHERE e.title NOT LIKE '%hk%' AND e.title NOT LIKE '%fake%' AND e.title NOT LIKE '%test%'
@@ -102,11 +105,12 @@ Class CRM_HK_Activities_Import {
       }
       else {
         $sql = "
-        SELECT t.id as source_id,
+        SELECT
           t.name as subject,
           t.created_date as created_date,
           t.created_date as activity_date,
-          et.entity_id as target_contact_id
+          et.entity_id as target_contact_id,
+          et.entity_id as source_id
           FROM civicrm_tag t
            INNER JOIN civicrm_entity_tag et ON t.id = et.tag_id AND et.entity_table = 'civicrm_contact'
            INNER JOIN civicrm_contact cc ON cc.id = et.entity_id
@@ -117,11 +121,12 @@ Class CRM_HK_Activities_Import {
     elseif (in_array($this->activityTypeName, array('SALTA', 'Sign Card', 'Petition'))) {
       $searchString = ($this->activityTypeName == 'Sign Card') ? 'Card' : $this->activityTypeName;
       $sql = "
-      SELECT t.id as source_id,
+      SELECT
         t.name as subject,
         t.created_date as created_date,
         t.created_date as activity_date,
-        et.entity_id as target_contact_id
+        et.entity_id as target_contact_id,
+        et.entity_id as source_id
         FROM civicrm_tag t
          INNER JOIN civicrm_entity_tag et ON t.id = et.tag_id AND et.entity_table = 'civicrm_contact'
          INNER JOIN civicrm_contact cc ON cc.id = et.entity_id
@@ -199,7 +204,7 @@ Class CRM_HK_Activities_Import {
           if (!empty($stringReplaceMap)) {
             $dao->subject = str_replace(array_keys($stringReplaceMap), '', $dao->subject);
           }
-          $activityParams['subject'] = str_replace(array('HS', '.', 'Card', '_'), array('', ' ', '', ''), $dao->subject);
+          $activityParams['subject'] = str_replace(array('HS', '.', 'Card', '_', '__'), array('', ' ', '', ' ', ' '), $dao->subject);
           $activityParams['source_record_id'] = $dao->source_id;
         }
         civicrm_api3('Activity', 'create', $activityParams);
