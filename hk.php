@@ -59,6 +59,29 @@ function hk_civicrm_disable() {
 }
 
 /**
+ * Implements hook_civicrm_alterReportVar().
+ */
+function hk_civicrm_alterReportVar($text, &$columns, $form) {
+  if (get_class($form) == 'CRM_Report_Form_Walklist_Walklist' && $text == 'columns') {
+    $columns['civicrm_group'] = array(
+      'dao' => 'CRM_Contact_DAO_Group',
+      'fields' => array(),
+      'filters' => array(
+        'gid' => array(
+          'name' => 'group_id',
+          'title' => ts('Group'),
+          'type' => CRM_Utils_Type::T_INT,
+          'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+          'group' => TRUE,
+          'options' => CRM_Core_PseudoConstant::nestedGroup(),
+        ),
+      )
+    );
+    ksort($columns);
+  }
+}
+
+/**
  * Implements hook_civicrm_upgrade().
  *
  * @param $op string, the type of operation being performed; 'check' or 'enqueue'
